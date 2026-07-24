@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Engineering case study: hardware-aware circuit partitioning and scheduler research for capacity-limited multi-chain trapped-ion systems.">
+    <meta name="theme-color" content="#f3f1eb">
+    <title>Hardware-Aware Partitioner &amp; Scheduler Research | Charlie He</title>
+    <link rel="stylesheet" href="../../styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="wordmark" href="../../" aria-label="Charlie He, home">Charlie He</a>
+        <nav aria-label="Primary navigation">
+          <ul class="nav-list">
+            <li><a href="../../#interests">Interests</a></li>
+            <li><a href="../../#work">Work</a></li>
+            <li><a href="../../#about">About</a></li>
+            <li><a href="../../#cv">CV</a></li>
+            <li><a href="../../#contact">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <article>
+        <header class="case-hero shell">
+          <a class="back-link" href="../../"><span aria-hidden="true">←</span> Portfolio</a>
+          <p class="eyebrow">Quantum systems software · Research engineering · 2026</p>
+          <h1>Hardware-Aware Partitioner &amp; Scheduler Research</h1>
+          <p class="case-lede">A capacity-aware circuit partitioner evaluated through an inherited scheduler/simulator, with merged partitioning work kept distinct from unmerged search research.</p>
+          <ul class="status-list" aria-label="Project validation status">
+            <li><span class="status-dot status-measured" aria-hidden="true"></span>Partitioner merged and locally verified</li>
+            <li><span class="status-dot status-design" aria-hidden="true"></span>Scheduler research remains opt-in</li>
+            <li><span class="status-dot status-open" aria-hidden="true"></span>Simulation evidence; no hardware validation</li>
+          </ul>
+        </header>
+
+        <figure class="case-hero-figure animation-hero shell">
+          <div class="animation-frame">
+            <img id="ion-shuttle-animation" src="../../assets/ion-shuttle.gif" data-animated-src="../../assets/ion-shuttle.gif" data-static-src="../../assets/ion-shuttle-poster.webp" alt="Animation of logical ion connectivity and physical ion chains changing during entangling gates, swaps, and ion shuttling" width="960" height="540" fetchpriority="high">
+            <button class="animation-toggle" type="button" aria-controls="ion-shuttle-animation" aria-pressed="false">Pause animation</button>
+          </div>
+          <figcaption><strong>Manim concept animation.</strong> A model-level view of logical connectivity above physical ion chains as gates, swaps, and shuttling change the assignment. It explains the scheduling problem; it is not hardware footage or a measured trajectory.</figcaption>
+        </figure>
+
+        <div class="case-layout shell">
+          <aside class="case-toc" aria-label="Case study sections">
+            <p class="panel-label">Case study</p>
+            <ol>
+              <li><a href="#problem">Problem</a></li>
+              <li><a href="#role">My role</a></li>
+              <li><a href="#constraints">Constraints</a></li>
+              <li><a href="#methods">Methods</a></li>
+              <li><a href="#validation">Validation</a></li>
+              <li><a href="#research">Beam search</a></li>
+              <li><a href="#oracle">Exact oracle</a></li>
+              <li><a href="#cost-to-go">Cost-to-go</a></li>
+              <li><a href="#pruning">UB/LB pruning</a></li>
+              <li><a href="#results">Decisions</a></li>
+              <li><a href="#limitations">Limitations</a></li>
+            </ol>
+          </aside>
+
+          <div class="case-content">
+            <section id="problem" class="case-section">
+              <p class="eyebrow">01</p>
+              <h2>Problem</h2>
+              <p>Splitting a quantum circuit across several capacity-limited ion chains is not only a graph-partitioning problem. Every cross-chain interaction can require modeled transport, so a partition that looks efficient statically may perform poorly once a scheduler applies capacity, timing, and error constraints.</p>
+              <p>The practical question was therefore not simply “how few edges are cut?” It was “which legal partition still behaves well when executed through the system model?”</p>
+            </section>
+
+            <section id="role" class="case-section">
+              <p class="eyebrow">02</p>
+              <h2>My role</h2>
+              <p>I developed most of the capacity-aware partitioner and its benchmark and analysis harnesses. The merged work added temporal and graph-based candidate families, legal-capacity handling, regression checks, and scheduler-in-the-loop comparisons.</p>
+              <p>I also extended an inherited, QCCDSim-related scheduler/simulator to investigate transport-aware search and model correctness. That scheduler base predates my work; the research extension was maintained separately from the merged partitioner.</p>
+            </section>
+
+            <section id="constraints" class="case-section">
+              <p class="eyebrow">03</p>
+              <h2>Constraints</h2>
+              <ul class="constraint-list">
+                <li><strong>Legal capacity:</strong> candidate assignments must satisfy a fixed chain count and allowed chain sizes.</li>
+                <li><strong>Execution order:</strong> early two-qubit interactions can matter more than a static interaction graph suggests.</li>
+                <li><strong>Model coupling:</strong> shuttle choices change modeled time and error, so scheduler semantics affect partitioner conclusions.</li>
+                <li><strong>Search scale:</strong> exact search grows combinatorially and is useful mainly as a small-case oracle or diagnostic.</li>
+                <li><strong>Evidence consistency:</strong> timing, error, and transport models changed during the work; results from different model dates are not directly interchangeable.</li>
+              </ul>
+            </section>
+
+            <section id="methods" class="case-section visual-section">
+              <p class="eyebrow">04</p>
+              <h2>Partitioner methods</h2>
+              <p>The partitioner generated multiple candidate views of the same circuit rather than committing to one heuristic. Temporal grouping preserved early executable structure; graph-based candidates used connectivity and spectral structure. Capacity-aware trimming, rebalancing, and repair converted those candidates into legal assignments.</p>
+
+              <figure class="wide-figure slide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution temporal-candidate diagram">
+                  <img src="../../assets/partitioner-causal-groups.svg" alt="Diagram showing overlapping causal proto-groups formed by forward expansion and recursive backward fill" width="1107" height="449" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Temporal-candidate diagram.</strong> Forward expansion can trigger backward fill on newly reached qubits. The overlapping proto-groups are candidate structures rather than rectangular time windows or final ion-chain assignments.</figcaption>
+              </figure>
+
+              <figure class="wide-figure slide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution depth-2 temporal-grouping diagram">
+                  <img src="../../assets/partitioner-depth2-backtracking.svg" alt="Diagram comparing depth-1 and depth-2 temporal grouping with recursive backtracking through circuit gates" width="1099" height="426" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Depth-2 method diagram.</strong> The second lookahead reaches a later interaction and recursively backtracks through dependent gates, expanding the candidate without claiming that the diagram is executable pseudocode.</figcaption>
+              </figure>
+
+              <figure class="wide-figure slide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution graph and temporal candidate benchmark">
+                  <img src="../../assets/partitioner-graph-temporal-benchmark.png" alt="Two-panel benchmark chart comparing graph, spectral, and temporal partition candidates with a naive baseline across clustered, dense, and sparse random circuits" width="1280" height="504" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Candidate-family benchmark.</strong> Graph, spectral, and temporal candidates are compared against the tested naive baseline across clustered, dense, and sparse synthetic groups. The top panel reports normalized modeled error; the bottom reports normalized shuttle count.</figcaption>
+              </figure>
+
+              <figure class="wide-figure slide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution spectral candidate benchmark">
+                  <img src="../../assets/partitioner-spectral-benchmark.png" alt="Two-panel benchmark chart comparing a spectral layer-inverse candidate with a depth-1 temporal candidate and a naive baseline" width="1280" height="630" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Focused candidate comparison.</strong> A spectral layer-inverse candidate and a depth-1 temporal candidate are compared with the same naive reference for modeled error and shuttle count. Both charts remain baseline- and model-specific simulation evidence, not hardware measurements.</figcaption>
+              </figure>
+
+              <div class="evidence-callout">
+                <p><strong>Design principle:</strong> use static structure to generate candidates, then let execution-facing metrics challenge the partition. A graph cut alone is not treated as the final answer.</p>
+              </div>
+            </section>
+
+            <section id="validation" class="case-section">
+              <p class="eyebrow">05</p>
+              <h2>Validation evidence</h2>
+              <p>The partitioner change set was merged into the project’s main branch. At the reviewed merged commit, a local no-bytecode rerun of the Step 1 indexed-equivalence check passed 72 runs. Committed experiment records also preserve scheduler-backed synthetic sweeps, ablations, and baseline comparisons.</p>
+              <ul class="result-list">
+                <li><strong>Correctness scope:</strong> the 72-run check verifies indexed-equivalence behavior for Step 1; it is not a claim of full end-to-end correctness.</li>
+                <li><strong>Benchmark scope:</strong> reported ratios are normalized to a stated baseline on synthetic circuits.</li>
+                <li><strong>Model scope:</strong> the merged partitioner benchmark predates later scheduler corrections and cannot be presented as current system performance.</li>
+              </ul>
+            </section>
+
+            <section id="research" class="case-section visual-section">
+              <p class="eyebrow">06</p>
+              <h2>Beam search: useful, but not an answer</h2>
+              <p>A separate research branch asked whether looking beyond the next locally cheap action could improve schedule quality. Dynamic beam search kept several partial schedules alive and ranked them after a fixed lookahead horizon, using the same simulator semantics as the matched greedy baseline.</p>
+
+              <figure class="wide-figure slide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution beam-horizon diagram">
+                  <img src="../../assets/scheduler-beam-horizon.svg" alt="Search-tree diagram comparing greedy ranking after one action with beam ranking after several action layers" width="1051" height="468" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Fixed-horizon comparison.</strong> Greedy ranks after the next action; the beam prototype compares several deeper partial paths. Neither horizontal line represents the cost of a completed schedule.</figcaption>
+              </figure>
+
+              <p>Restricted allowed-size cases showed repeatable quality gains in the recorded sample, but unrestricted cases still traded modeled error, transport, and runtime. The tested restricted setting improved the three recorded quality ratios relative to matched greedy runs while averaging approximately 297 times the local wall time.</p>
+
+              <figure class="wide-figure slide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution beam and greedy modeled-error benchmark">
+                  <img src="../../assets/scheduler-beam-benchmark.png" alt="Three-panel chart comparing normalized modeled-error ratios for greedy scheduling and four beam-search configurations under unrestricted and restricted chain sizes" width="2897" height="907" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Beam benchmark.</strong> Four budget allocations within the Beam strategy are compared with matched greedy runs under unrestricted and restricted chain sizes. Restricted-capacity gains did not carry cleanly into the unrestricted panel, so the experiment did not justify replacing the public default.</figcaption>
+              </figure>
+
+              <figure class="wide-figure slide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution allowed-size gap sensitivity benchmark">
+                  <img src="../../assets/scheduler-gap-sensitivity.png" alt="Parameter-sensitivity chart comparing normalized modeled-error ratios for three allowed chain-size gaps across nine synthetic groups" width="2790" height="1296" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Allowed-size sensitivity.</strong> Gap 1 has the lowest mean in each displayed group, but overlapping error bars and the restricted synthetic sample prevent a universal-optimum claim.</figcaption>
+              </figure>
+
+              <div class="evidence-callout">
+                <p><strong>Research pivot:</strong> after the main beam parameters had largely converged, the useful question was no longer “which width should I try next?” It was “does beam miss the right action, or does it generate the right action and rank it incorrectly?”</p>
+              </div>
+            </section>
+
+            <section id="oracle" class="case-section visual-section">
+              <p class="eyebrow">07</p>
+              <h2>An exact oracle exposed where beam lost the path</h2>
+              <p>I built a uniform-cost exact oracle over the simulator’s own successor rules. It enumerated ready cross-chain gates and legal transport options without beam caps; because the accumulated negative-log fidelity loss is nonnegative and additive, the first zero-failure terminal state popped by the search is optimal under that action model.</p>
+
+              <div class="research-table-wrap" tabindex="0" aria-label="Exact-oracle benchmark table, horizontally scrollable on small screens">
+                <table class="research-table">
+                  <caption>Beam quality against the small-system exact oracle</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Qubits</th>
+                      <th scope="col">Beam exactly optimal</th>
+                      <th scope="col">Mean beam / optimum</th>
+                      <th scope="col">Oracle expansions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><th scope="row">4</th><td>4 / 5</td><td>1.020×</td><td>median 3</td></tr>
+                    <tr><th scope="row">6</th><td>5 / 5</td><td>1.000×</td><td>median 14</td></tr>
+                    <tr><th scope="row">8</th><td>3 / 5</td><td>1.063×</td><td>median 79</td></tr>
+                    <tr><th scope="row">10</th><td>0 / 5</td><td>1.221×</td><td>median 862; max 2,485</td></tr>
+                    <tr><th scope="row">12, seed 5</th><td>0 / 1</td><td>1.421×</td><td>32,995</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p>The N=12 case generated 142,276 children, retained 108,284 unique states, and took roughly 34–39 seconds. Exact search therefore worked as a small-system diagnostic, not as a scalable scheduler. Under the working dense-circuit assumption that two-qubit work grows on the order of N<sup>2</sup>, the search burden was expected heuristically to scale as O(exp(N<sup>2</sup>)); this is a regime-specific scaling expectation, not a proven bound for every circuit.</p>
+              <p>The more important result came from tracing eight known non-optimal beam runs to their first departure from an oracle-optimal prefix. In all eight, an optimal immediate commit had been generated and survived into the final candidate list. Beam did not lack the action; it preferred a cheaper-looking short-term prefix, or in one tied case used generation order to choose the worse future topology.</p>
+            </section>
+
+            <section id="cost-to-go" class="case-section visual-section">
+              <p class="eyebrow">08</p>
+              <h2>The missing signal was remaining cost</h2>
+              <p>To separate immediate action quality from the future it creates, I extended the oracle to score every saved first-commit candidate. For a root state <em>s</em> and candidate <em>a</em>, the exact action value is the loss paid now plus the optimal remaining suffix:</p>
+
+              <div class="equation-block" role="math" aria-label="Q star of state s and action a equals delta g of s and a plus V star of state s sub a. Regret of s and a equals Q star of s and a minus V star of s.">
+                <math display="block" aria-hidden="true">
+                  <mrow>
+                    <msup><mi>Q</mi><mo>*</mo></msup>
+                    <mo>(</mo><mi>s</mi><mo>,</mo><mi>a</mi><mo>)</mo>
+                    <mo>=</mo>
+                    <mi>&Delta;</mi><mi>g</mi>
+                    <mo>(</mo><mi>s</mi><mo>,</mo><mi>a</mi><mo>)</mo>
+                    <mo>+</mo>
+                    <msup><mi>V</mi><mo>*</mo></msup>
+                    <mo>(</mo><msub><mi>s</mi><mi>a</mi></msub><mo>)</mo>
+                  </mrow>
+                </math>
+                <math display="block" aria-hidden="true">
+                  <mrow>
+                    <mtext>regret</mtext>
+                    <mo>(</mo><mi>s</mi><mo>,</mo><mi>a</mi><mo>)</mo>
+                    <mo>=</mo>
+                    <msup><mi>Q</mi><mo>*</mo></msup>
+                    <mo>(</mo><mi>s</mi><mo>,</mo><mi>a</mi><mo>)</mo>
+                    <mo>&minus;</mo>
+                    <msup><mi>V</mi><mo>*</mo></msup>
+                    <mo>(</mo><mi>s</mi><mo>)</mo>
+                  </mrow>
+                </math>
+              </div>
+
+              <figure class="wide-figure slide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution future-cost path diagram">
+                  <img src="../../assets/scheduler-future-cost.svg" alt="Path diagram showing three partial schedules scored by executed cost plus predicted remaining cost to a terminal state" width="957" height="427" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Cost-to-go model.</strong> Comparing partial paths fairly requires both the executed cost <em>g</em> and a remaining-cost term <em>h</em>. The exact suffix value was used as an offline truth label, not as a deployable predictor.</figcaption>
+              </figure>
+
+              <p>The first audit traced eight deliberately selected beam failures to the point where they left an oracle-optimal path. In every case, an optimal immediate commit had been generated and retained. Beam did not lack the action; it ranked the future state it created too weakly.</p>
+
+              <p>Because those roots were selected for failure and concentrated early in circuit execution, I did not treat their original mean correlation as a population estimate. A follow-up exact pilot sampled 38 real decision states and 136 retained commits across four progress bands. Mean within-state Spearman correlation between exact suffix cost and Q* regret was 0.604, 0.574, 0.879, and 0.926 from early to late progress.</p>
+
+              <p>The result did not support the hypothesis that future cost becomes less informative later in the circuit. It did not, however, make exact suffix cost a deployable ranking feature: V* is part of Q* by definition, and late states often retained only a few candidates, making rank correlation easier to saturate. The useful conclusion was narrower: immediate loss alone could not represent the topology-dependent consequences of a commit, while exact future cost provided an offline truth label for testing practical approximations.</p>
+            </section>
+
+            <section id="pruning" class="case-section visual-section">
+              <p class="eyebrow">09</p>
+              <h2>From cost-to-go to safe UB/LB pruning</h2>
+              <p>Full Q* is exponentially expensive. I therefore tested whether two admissible lower bounds could recover part of its decision signal: a gate-loss floor for remaining work and a cut-matching transport bound for the minimum qubits that must cross adjacent chain separators.</p>
+
+              <figure class="wide-figure slide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution move lower-bound diagram">
+                  <img src="../../assets/scheduler-move-bound.svg" alt="Two-part diagram showing shared cross-chain interaction endpoints and minimum vertex-cover bounds across adjacent chain cuts" width="1074" height="395" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Cut-matching bound.</strong> Crossing gates that share an endpoint may require only one moved qubit. Bounding each adjacent chain separator independently avoids double-counting a single interaction as a separate move.</figcaption>
+              </figure>
+
+              <p>Their sum is <em>h</em>; adding the loss of the immediate macro action gives a lower bound on the complete action value, <em>Q</em><sub>LB</sub>. I evaluated these quantities on 150 fresh circuits spanning dense, sparse, and clustered structures: 646 progress-conditioned decision states and 2,926 retained first commits. Correlations were computed within each state, averaged by circuit, and then balanced equally across circuit types. Confidence intervals used 10,000 whole-circuit cluster-bootstrap samples.</p>
+
+              <div class="equation-block single-equation" role="math" aria-label="h equals h gate plus h cut. Q lower bound equals immediate action loss plus h.">
+                <math display="block" aria-hidden="true">
+                  <mrow>
+                    <mi>h</mi>
+                    <mo>=</mo>
+                    <msub><mi>h</mi><mtext>gate</mtext></msub>
+                    <mo>+</mo>
+                    <msub><mi>h</mi><mtext>cut</mtext></msub>
+                    <mspace width="1.5em"></mspace>
+                    <msub><mi>Q</mi><mtext>LB</mtext></msub>
+                    <mo>=</mo>
+                    <mi>&Delta;</mi><mi>g</mi>
+                    <mo>+</mo>
+                    <mi>h</mi>
+                  </mrow>
+                </math>
+              </div>
+
+              <div class="research-table-wrap" tabindex="0" aria-label="Progress-conditioned lower-bound validation table, horizontally scrollable on small screens">
+                <table class="research-table compact-table">
+                  <caption>Progress-conditioned lower-bound validation</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Circuit progress</th>
+                      <th scope="col">&rho;(h, V*)</th>
+                      <th scope="col">&rho;(Q<sub>LB</sub>, Q*)</th>
+                      <th scope="col">Q<sub>LB</sub> top-1 overlap</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><th scope="row">0%</th><td>0.414</td><td>0.517</td><td>69.8%</td></tr>
+                    <tr><th scope="row">20%</th><td>0.552</td><td>0.497</td><td>67.8%</td></tr>
+                    <tr><th scope="row">40%</th><td>0.549</td><td>0.581</td><td>84.0%</td></tr>
+                    <tr><th scope="row">60%</th><td>0.664</td><td>0.623</td><td>83.3%</td></tr>
+                    <tr><th scope="row">80%</th><td>0.801</td><td>0.760</td><td>93.8%</td></tr>
+                    <tr class="key-row"><th scope="row">Overall</th><td><strong>0.593</strong></td><td><strong>0.592</strong></td><td><strong>79.7%</strong></td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p>The progress labels are bucket centers rather than exact sample points: 0%, 20%, 40%, 60%, and 80% denote [0%, 10%), [10%, 30%), [30%, 50%), [50%, 70%), and [70%, 90%). The combined bound carried a moderate but consistent future-cost signal: overall &rho;(h, V*) was 0.593 with a 95% confidence interval of [0.546, 0.638]. After immediate action cost was restored, &rho;(Q<sub>LB</sub>, Q*) was 0.592 [0.549, 0.635], and the lower-bound score selected a Q*-optimal retained action in 79.7% [76.3%, 82.9%] of states.</p>
+
+              <p>The signal generally strengthened toward the end of the circuit, but not monotonically. Early top-1 agreement remained only about 68–70%, so the lower bound was useful evidence rather than a reliable replacement for exact action values. Candidate pooling was deliberately excluded from the headline result because shared progress trends inflated the pooled correlations.</p>
+
+              <p>The useful combination emerged in a dynamic bounded frontier. A feasible completed schedule supplies an upper bound, while each partial branch is expanded by its accumulated loss plus both lower bounds. A branch is pruned only when it cannot beat the current feasible completion.</p>
+
+              <div class="equation-block single-equation" role="math" aria-label="f of state equals g of state plus h gate of state plus h cut of state. Prune only when f of state exceeds the feasible upper bound.">
+                <math display="block" aria-hidden="true">
+                  <mrow>
+                    <mi>f</mi><mo>(</mo><mi>s</mi><mo>)</mo>
+                    <mo>=</mo>
+                    <mi>g</mi><mo>(</mo><mi>s</mi><mo>)</mo>
+                    <mo>+</mo>
+                    <msub><mi>h</mi><mtext>gate</mtext></msub><mo>(</mo><mi>s</mi><mo>)</mo>
+                    <mo>+</mo>
+                    <msub><mi>h</mi><mtext>cut</mtext></msub><mo>(</mo><mi>s</mi><mo>)</mo>
+                    <mspace width="1em"></mspace>
+                    <mtext>prune only when</mtext>
+                    <mspace width="0.35em"></mspace>
+                    <mi>f</mi><mo>(</mo><mi>s</mi><mo>)</mo>
+                    <mo>&gt;</mo>
+                    <mi mathvariant="normal">UB</mi>
+                  </mrow>
+                </math>
+              </div>
+
+              <figure class="wide-figure slide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution branch-and-bound pruning diagram">
+                  <img src="../../assets/scheduler-exact-pruning.svg" alt="Branch-and-bound diagram showing branches continued or pruned by comparing their lower bound with the best complete schedule" width="1130" height="472" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Dynamic branch-and-bound.</strong> The upper bound comes from a reachable zero-failure completion, not from leaked oracle knowledge. Strict lower-bound crossings eliminate only branches that cannot improve it.</figcaption>
+              </figure>
+
+              <p>Admissibility also made the score useful as a certificate. Against a reachable upper bound, the combined lower bound could strictly eliminate an increasing share of non-optimal retained commits as the circuit progressed:</p>
+
+              <div class="research-table-wrap" tabindex="0" aria-label="Static strict-pruning rate by circuit progress, horizontally scrollable on small screens">
+                <table class="research-table compact-table">
+                  <caption>Strictly prunable non-optimal retained commits</caption>
+                  <thead>
+                    <tr><th scope="col">Circuit progress</th><th scope="col">Strict prune</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><th scope="row">0%</th><td>6.9% (34/493)</td></tr>
+                    <tr><th scope="row">20%</th><td>10.7% (57/533)</td></tr>
+                    <tr><th scope="row">40%</th><td>23.0% (100/434)</td></tr>
+                    <tr><th scope="row">60%</th><td>34.3% (120/350)</td></tr>
+                    <tr><th scope="row">80%</th><td>53.5% (114/213)</td></tr>
+                    <tr class="key-row"><th scope="row">Overall</th><td><strong>21.0% (425/2,023)</strong></td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p>No false strict prune was observed in the 150-circuit study. This static retained-candidate diagnostic is separate from the dynamic bounded-frontier experiment below: the former measures immediate pruning opportunities at sampled states, while the latter counts expansions accumulated while solving complete suffixes.</p>
+
+              <div class="research-table-wrap" tabindex="0" aria-label="Lower-bound ablation table, horizontally scrollable on small screens">
+                <table class="research-table compact-table">
+                  <caption>Strict expansions with the same reachable upper bound</caption>
+                  <thead>
+                    <tr><th scope="col">Lower-bound configuration</th><th scope="col">Strict expansions</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><th scope="row">No lower bound, h=0</th><td>35,517</td></tr>
+                    <tr><th scope="row">Gate bound only</th><td>723</td></tr>
+                    <tr><th scope="row">Cut bound only</th><td>10,448</td></tr>
+                    <tr class="key-row"><th scope="row">Gate + cut bounds</th><td><strong>173</strong></td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="evidence-callout">
+                <p><strong>Audited result:</strong> across the candidate suffixes, independent uniform-cost search required 116,550 aggregate expansions. The reachable-UB frontier with both lower bounds required 173, agreed with exact Q*, and produced zero false strict prunes. The counts are aggregate expanded states, not generated children or a per-circuit runtime claim.</p>
+              </div>
+            </section>
+
+            <section id="results" class="case-section">
+              <p class="eyebrow">10</p>
+              <h2>What the evidence changed</h2>
+              <ul class="result-list">
+                <li><strong>Merged partitioner:</strong> retain the legal-capacity candidate generator, regression checks, and scheduler-backed evaluation harness.</li>
+                <li><strong>Beam search:</strong> keep it opt-in; the recorded quality gains did not offset the runtime cost or explain why it failed.</li>
+                <li><strong>Exact oracle:</strong> use it for small-system diagnosis. It showed that beam’s central failure was ranking available actions without enough future-cost information.</li>
+                <li><strong>UB/LB path:</strong> continue as an offline bounded decision-oracle direction because it combines a reachable completion with safe, complementary future-cost bounds.</li>
+                <li><strong>Rejected shortcuts:</strong> do not treat a static graph cut, a larger beam budget, or a hand-tuned immediate score as a substitute for execution-aware evidence.</li>
+              </ul>
+            </section>
+
+            <section id="limitations" class="case-section limitation-section">
+              <p class="eyebrow">11</p>
+              <h2>Limitations</h2>
+              <p>The scheduler/simulator extension remains an unmerged, opt-in research branch. Dynamic beam did not replace the public default, and the UB/LB work remains an offline bounded decision-oracle direction rather than production scheduler logic. Because an inherited gate-time calculation was corrected during the work, older timing-sensitive results remain tied to their original model and should not be compared directly with later runs.</p>
+              <p>The evidence is dominated by random synthetic circuits and model-based metrics. Real-application coverage, hardware calibration, coherence and error assumptions, publication-scoped baselines, and production-scale exact-search completeness remain open. The original 38 Q*-labeled candidates came from selected failure roots; the follow-up exact pilot broadened progress coverage but remained limited to 38 states and 136 retained commits, with small candidate sets late in the circuit. The 150-circuit lower-bound study provides broader validation, but it still follows sampled current-policy trajectories rather than a production workload distribution. None of these samples is a training dataset. No trapped-ion hardware execution or production deployment is claimed.</p>
+            </section>
+          </div>
+        </div>
+      </article>
+
+      <dialog id="image-lightbox" class="image-lightbox" aria-label="Full-resolution project figure">
+        <div class="lightbox-panel">
+          <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close full-resolution figure">×</button>
+          <figure class="lightbox-figure">
+            <img id="lightbox-image" class="lightbox-image" alt="Full-resolution project figure" width="1600" height="900">
+            <figcaption id="lightbox-caption"></figcaption>
+          </figure>
+        </div>
+      </dialog>
+
+      <section class="section contact-section" aria-labelledby="next-title">
+        <div class="shell contact-grid">
+          <div>
+            <p class="eyebrow">Next</p>
+            <h2 id="next-title">Discuss the system model</h2>
+          </div>
+          <div class="contact-links">
+            <a href="mailto:charlie.he@duke.edu">charlie.he@duke.edu</a>
+            <a href="../../#work">Return to selected work <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <p>Charlie He · Experimental systems &amp; research</p>
+        <a href="#main">Back to top <span aria-hidden="true">↑</span></a>
+      </div>
+    </footer>
+    <script src="../../assets/lightbox.js"></script>
+    <script>
+      const animation = document.querySelector("#ion-shuttle-animation");
+      const animationToggle = document.querySelector(".animation-toggle");
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function setAnimationPaused(paused) {
+        animation.src = paused ? animation.dataset.staticSrc : animation.dataset.animatedSrc;
+        animationToggle.textContent = paused ? "Play animation" : "Pause animation";
+        animationToggle.setAttribute("aria-pressed", String(paused));
+      }
+
+      if (reduceMotion) setAnimationPaused(true);
+      animationToggle.addEventListener("click", () => {
+        setAnimationPaused(animationToggle.getAttribute("aria-pressed") !== "true");
+      });
+    </script>
+  </body>
+</html>

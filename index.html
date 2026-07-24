@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Charlie He — experimental systems engineer interested in quantum hardware, RF measurement, modeling, and reliability.">
+    <meta name="referrer" content="no-referrer">
+    <meta name="theme-color" content="#f3f1eb">
+    <title>Charlie He | Experimental Systems &amp; Research</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="wordmark" href="./" aria-label="Charlie He, home">Charlie He</a>
+        <nav aria-label="Primary navigation">
+          <ul class="nav-list">
+            <li><a href="#interests">Interests</a></li>
+            <li><a href="#work">Work</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#cv">CV</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero profile-hero shell" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Charlie He · Experimental systems engineer</p>
+          <h1 id="hero-title">I like understanding what physical systems actually do.</h1>
+          <p class="lede">My work sits between models, measurements, and the engineering decisions that connect them. I am especially interested in experimental quantum systems, RF and control hardware, test design, and reliability.</p>
+          <div class="action-row">
+            <a class="button button-primary" href="#work">Explore selected work</a>
+            <a class="button button-secondary" href="mailto:charlie.he@duke.edu">Get in touch</a>
+          </div>
+        </div>
+        <aside class="profile-aside" aria-label="Current focus">
+          <p class="panel-label">Now</p>
+          <p>Research assistant in the Duke Quantum Center’s Noel Lab, working across trapped-ion systems engineering, research software, and experimental hardware.</p>
+          <p class="aside-note">Duke M.S. ECE · May 2026</p>
+        </aside>
+      </section>
+
+      <section class="section section-tinted" id="interests" aria-labelledby="interests-title">
+        <div class="shell">
+          <div class="section-heading">
+            <p class="eyebrow">Research interests</p>
+            <h2 id="interests-title">Questions I keep returning to</h2>
+            <p>Current interests, shaped by the systems I have worked on so far.</p>
+          </div>
+          <div class="interest-grid">
+            <article class="interest-card">
+              <p class="interest-number">01</p>
+              <h3>Experimental quantum systems</h3>
+              <p>How should electronics, optics, vacuum hardware, and control software be designed as one experimental system?</p>
+            </article>
+            <article class="interest-card">
+              <p class="interest-number">02</p>
+              <h3>Model to measurement</h3>
+              <p>How do parasitics, loading, and implementation details change where a useful model stops matching the hardware?</p>
+            </article>
+            <article class="interest-card">
+              <p class="interest-number">03</p>
+              <h3>Mathematics in practice</h3>
+              <p>How can abstract mathematical ideas become useful tools for solving real problems in complex physical systems?</p>
+            </article>
+            <article class="interest-card">
+              <p class="interest-number">04</p>
+              <h3>From quantum dynamics to controls</h3>
+              <p>How can reduced quantum models connect microscopic dynamics to parameters an experiment can tune and observe?</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section shell" id="work" aria-labelledby="work-title">
+        <div class="section-heading">
+          <p class="eyebrow">Selected work</p>
+          <h2 id="work-title">A few ways I approach systems</h2>
+          <p>Work shaped by modeling, measurement, software, and real-world troubleshooting.</p>
+        </div>
+        <div class="work-list">
+          <article class="work-row work-row-featured">
+            <p class="work-index">01</p>
+            <div class="work-copy">
+              <p class="work-kicker">RF hardware · Full case study</p>
+              <h3>Compact Toroidal RF Resonator</h3>
+              <p>A directly tapped, open-loop resonator developed through circuit modeling, full-wave simulation, parameter extraction, prototype builds, and room-temperature measurement.</p>
+              <a class="text-link" href="./projects/resonator/">Open the visual case study <span aria-hidden="true">→</span></a>
+            </div>
+            <figure class="work-thumb">
+              <img src="./assets/resonator-open-loop.png" alt="COMSOL geometry view of an open-loop toroidal resonator" width="683" height="369">
+            </figure>
+          </article>
+          <article class="work-row">
+            <p class="work-index">02</p>
+            <div class="work-copy">
+              <p class="work-kicker">Research engineering · Systems software</p>
+              <h3>Multi-zone trapped-ion systems</h3>
+              <p>Developed most of a hardware-aware circuit partitioner and extended an inherited scheduler/simulator to study transport, modeled error, and constrained multi-chain execution.</p>
+              <a class="text-link" href="./projects/partitioner/">Open the visual case study <span aria-hidden="true">→</span></a>
+            </div>
+            <figure class="work-thumb">
+              <img src="./assets/partitioner-causal-groups.svg" alt="Circuit diagram with overlapping temporal candidate groups highlighted across qubit lines" width="1107" height="449" loading="lazy" decoding="async">
+            </figure>
+          </article>
+          <article class="work-row">
+            <p class="work-index">03</p>
+            <div class="work-copy">
+              <p class="work-kicker">Industry experience · Root-cause analysis</p>
+              <h3>Glass manufacturing process diagnosis</h3>
+              <p>Built statistical quality-control and root-cause workflows for production data, then used them with cross-functional teams to shorten anomaly diagnosis and guide corrective action.</p>
+            </div>
+            <p class="work-meta">No internal production data published</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-tinted" id="about" aria-labelledby="about-title">
+        <div class="shell two-column">
+          <div class="section-heading compact">
+            <p class="eyebrow">About</p>
+            <h2 id="about-title">Physics-grounded engineering, from production floors to quantum hardware</h2>
+          </div>
+          <div class="prose-stack">
+            <p>I earned an M.S. in Electrical &amp; Computer Engineering from Duke University in May 2026 and currently work as a research assistant in the Duke Quantum Center’s Noel Lab.</p>
+            <p>My experience spans RF resonator design and characterization, trapped-ion systems work, Python-based analysis and test automation, and manufacturing root-cause analysis. I am most useful where a team needs to connect a physical model to an observable test and then explain the gap.</p>
+            <ul class="tag-list" aria-label="Capability areas">
+              <li>RF &amp; impedance matching</li>
+              <li>VNA &amp; Smith-chart measurement</li>
+              <li>COMSOL &amp; SPICE</li>
+              <li>Python data analysis</li>
+              <li>Reliability reasoning</li>
+              <li>Test documentation</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section shell" id="cv" aria-labelledby="cv-title">
+        <div class="section-heading">
+          <p class="eyebrow">CV summary</p>
+          <h2 id="cv-title">A concise path through the work</h2>
+        </div>
+        <div class="timeline">
+          <article class="timeline-row">
+            <div class="timeline-meta"><p>2026–present</p><p>Durham, NC</p></div>
+            <div><h3>Master Research Assistant · Duke Quantum Center, Noel Lab</h3><p>Systems engineering for multi-zone trapped-ion hardware, architecture-level circuit partitioning, scheduler extensions, reproducible experiment pipelines, and regression checks.</p></div>
+          </article>
+          <article class="timeline-row">
+            <div class="timeline-meta"><p>2021–2024</p><p>Illinois</p></div>
+            <div><h3>Hot End Specialist · Glass manufacturing</h3><p>Statistical quality control, process diagnosis, equipment troubleshooting, and cross-functional corrective action in a high-throughput production environment.</p></div>
+          </article>
+          <article class="timeline-row">
+            <div class="timeline-meta"><p>May 2026</p><p>Duke University</p></div>
+            <div><h3>M.S. Electrical &amp; Computer Engineering</h3><p>Research focus in trapped-ion quantum computing and experimental quantum error correction.</p></div>
+          </article>
+        </div>
+        <p class="cv-note">A concise web CV is provided here. A detailed résumé can be shared directly for a specific role.</p>
+      </section>
+
+      <section class="section contact-section" id="contact" aria-labelledby="contact-title">
+        <div class="shell contact-grid">
+          <div>
+            <p class="eyebrow">Contact</p>
+            <h2 id="contact-title">Working on a hard system problem?</h2>
+          </div>
+          <div class="contact-links">
+            <a href="mailto:charlie.he@duke.edu">charlie.he@duke.edu</a>
+            <a href="https://www.linkedin.com/in/charliezhe1212/" rel="me">LinkedIn profile <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner footer-with-counter">
+        <div class="footer-copy">
+          <p>Charlie He · Experimental systems &amp; research</p>
+          <a href="#main">Back to top <span aria-hidden="true">↑</span></a>
+        </div>
+        <div class="visitor-counter" aria-label="Visitor map">
+          <p class="visitor-counter-label">Visitor map</p>
+          <div class="visitor-counter-frame">
+            <a href="https://info.flagcounter.com/3qlE"><img src="https://s01.flagcounter.com/count/3qlE/bg_172D2B/txt_CBD4D1/border_34524E/columns_3/maxflags_6/viewers_0/labels_0/pageviews_0/flags_0/percent_0/" alt="Flag Counter" border="0"></a>
+          </div>
+          <p class="visitor-counter-note">Country count served by Flag Counter. <a href="https://www.flagcounter.com/privacy.html">Privacy</a></p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

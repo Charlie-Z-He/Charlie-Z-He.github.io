@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Visual engineering case study: compact toroidal RF resonator topology, modeling, parameter extraction, prototype measurement, and limitations.">
+    <meta name="theme-color" content="#f3f1eb">
+    <title>Compact Toroidal RF Resonator | Charlie He</title>
+    <link rel="stylesheet" href="../../styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="wordmark" href="../../" aria-label="Charlie He, home">Charlie He</a>
+        <nav aria-label="Primary navigation">
+          <ul class="nav-list">
+            <li><a href="../../#interests">Interests</a></li>
+            <li><a href="../../#work">Work</a></li>
+            <li><a href="../../#about">About</a></li>
+            <li><a href="../../#cv">CV</a></li>
+            <li><a href="../../#contact">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <article>
+        <header class="case-hero shell">
+          <a class="back-link" href="../../"><span aria-hidden="true">←</span> Portfolio</a>
+          <p class="eyebrow">RF hardware · M.S. project · 2026</p>
+          <h1>Compact Toroidal RF Resonator</h1>
+          <p class="case-lede">A modeling-to-measurement study of a directly tapped, open-loop toroidal resonator for compact trapped-ion RF delivery.</p>
+          <ul class="status-list" aria-label="Project validation status">
+            <li><span class="status-dot status-measured" aria-hidden="true"></span>Room-temperature bench characterized</li>
+            <li><span class="status-dot status-open" aria-hidden="true"></span>4 K / UHV validation not completed</li>
+            <li><span class="status-dot status-design" aria-hidden="true"></span>Feedback sensing in design</li>
+          </ul>
+        </header>
+
+        <figure class="case-hero-figure shell">
+          <button class="figure-open" type="button" aria-label="View full-resolution resonator bench photograph">
+            <img src="../../assets/resonator-prototype.jpg" alt="Connectorized toroidal resonator PCB connected to an RF source and power and SWR monitoring instruments on a laboratory bench" width="1280" height="960" fetchpriority="high">
+          </button>
+          <figcaption><strong>Later bench photograph.</strong> The connectorized resonator assembly in a room-temperature RF measurement setup with source and power/SWR monitoring.</figcaption>
+        </figure>
+
+        <div class="case-layout shell">
+          <aside class="case-toc" aria-label="Case study sections">
+            <p class="panel-label">Case study</p>
+            <ol>
+              <li><a href="#problem">Problem</a></li>
+              <li><a href="#role">My role</a></li>
+              <li><a href="#constraints">Constraints</a></li>
+              <li><a href="#methods">Methods</a></li>
+              <li><a href="#validation">Validation</a></li>
+              <li><a href="#results">Results</a></li>
+              <li><a href="#limitations">Limitations</a></li>
+            </ol>
+          </aside>
+
+          <div class="case-content">
+            <section id="problem" class="case-section">
+              <p class="eyebrow">01</p>
+              <h2>Problem</h2>
+              <p>A Sandia-developed three-zone Peregrine trap provides the application context: RF delivery near 40 MHz and 250 V, with less volume than the existing helical resonator. The engineering question was whether a toroidal device could provide a compact, tunable path without hiding parasitic loss behind an ideal circuit model.</p>
+              <figure class="comparison-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution resonator size-comparison photograph">
+                  <img src="../../assets/resonator-size-comparison.jpg" alt="Small toroidal winding beside a ruler above the much larger copper enclosure of the existing helical resonator" width="1937" height="2216" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Bench photograph, size context.</strong> The toroidal winding and existing helical-resonator enclosure are shown against the same ruler. This motivates the compact topology; it is not a performance comparison.</figcaption>
+              </figure>
+            </section>
+
+            <section id="role" class="case-section">
+              <p class="eyebrow">02</p>
+              <h2>My role</h2>
+              <p>Starting from a collaborator-provided prototype concept, my work focused on reinterpreting the coupling mechanism, developing the open-loop redesign, building the COMSOL/SPICE calibration workflow, extracting geometry-dependent parameters, and carrying the design through room-temperature characterization.</p>
+              <p>The project produced a 25-page design report and a 41-slide technical presentation.</p>
+            </section>
+
+            <section id="constraints" class="case-section">
+              <p class="eyebrow">03</p>
+              <h2>Constraints</h2>
+              <ul class="constraint-list">
+                <li><strong>Compactness:</strong> reduce RF-drive footprint while moving toward the approximately 40 MHz operating regime.</li>
+                <li><strong>Retunability:</strong> place the matching capacitor outside the future 4 K UHV chamber so adjustment does not require reopening it. This is design intent, not a completed cryogenic implementation.</li>
+                <li><strong>Loading:</strong> the RF delivery system requires resonator-voltage feedback. Any capacitive-divider pickoff and downstream rectifier must respect the strong resonance shift caused by added capacitance.</li>
+                <li><strong>Loss:</strong> connector resistance, PCB implementation, and full-wave structural effects can dominate behavior omitted by ideal matching theory.</li>
+              </ul>
+            </section>
+
+            <section id="methods" class="case-section visual-section">
+              <p class="eyebrow">04</p>
+              <h2>Methods</h2>
+              <p>The project moved through a sequence of engineering judgments: reject an ineffective physical interpretation, reshape the topology, extract a compact model from full-wave simulations, then test whether the resulting design trends survive on the bench.</p>
+
+              <div class="visual-pair">
+                <figure>
+                  <button class="figure-open" type="button" aria-label="View full-resolution magnetic-field simulation">
+                    <img src="../../assets/resonator-h-field.png" alt="COMSOL magnetic-field vectors circulating through the earlier closed-loop toroidal design" width="407" height="393" loading="lazy" decoding="async">
+                  </button>
+                  <figcaption><strong>Full-wave simulation.</strong> The earlier closed-loop field pattern showed opposing contributions that could reduce effective inductance.</figcaption>
+                </figure>
+                <figure>
+                  <button class="figure-open" type="button" aria-label="View full-resolution open-loop geometry model">
+                    <img src="../../assets/resonator-open-loop.png" alt="COMSOL geometry model of the redesigned open-loop toroidal resonator with direct electrical taps" width="683" height="369" loading="lazy" decoding="async">
+                  </button>
+                  <figcaption><strong>Geometry model.</strong> The open-loop redesign places ground and output at opposite ends of the coil and uses a direct electrical connection.</figcaption>
+                </figure>
+              </div>
+
+              <figure class="wide-figure figure-contained">
+                <button class="figure-open" type="button" aria-label="View full-resolution lumped-circuit schematic">
+                  <img src="../../assets/resonator-circuit-model.png" alt="Lumped circuit schematic with input coupling capacitor, toroidal inductance and resistance, total capacitance, trap capacitance, and output" width="942" height="291" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Schematic.</strong> The lumped circuit abstraction made coupling, matching, and output loading explicit before returning to full-wave behavior.</figcaption>
+              </figure>
+
+              <div class="visual-pair visual-pair-wide">
+                <figure>
+                  <button class="figure-open" type="button" aria-label="View full-resolution parameter-extraction setup">
+                    <img src="../../assets/resonator-parameter-extraction.png" alt="Annotated COMSOL geometry showing added gap capacitance and external impedance used for parameter extraction" width="766" height="484" loading="lazy" decoding="async">
+                  </button>
+                  <figcaption><strong>Extraction setup.</strong> Known electrical perturbations were added to the COMSOL model; shifted resonance and Q were used to infer effective lumped parameters.</figcaption>
+                </figure>
+                <figure>
+                  <button class="figure-open" type="button" aria-label="View full-resolution self-capacitance fit">
+                    <img src="../../assets/resonator-ctor-fit.png" alt="Plot of extracted toroid self-capacitance versus scale factor for four dielectric constants" width="800" height="600" loading="lazy" decoding="async">
+                  </button>
+                  <figcaption><strong>Simulation-derived fit.</strong> Representative self-capacitance scaling across geometry and dielectric cases.</figcaption>
+                </figure>
+              </div>
+
+              <figure class="wide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution structural-loss calibration plots">
+                  <img src="../../assets/resonator-loss-fit.png" alt="Four-panel linear-fit plots for structural loss calibration across dielectric cases" width="2885" height="2225" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Calibration plot.</strong> Structural-loss results collapse onto a compact geometry-dependent description across four dielectric sweeps. These are simulation-derived calibration points, not device measurements.</figcaption>
+              </figure>
+
+              <figure class="wide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution COMSOL and SPICE comparison">
+                  <img src="../../assets/resonator-model-comparison.png" alt="Side-by-side simulated S11 curves from COMSOL and SPICE across input-capacitance sweeps" width="3000" height="1200" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Model comparison.</strong> COMSOL and SPICE reproduce similar qualitative resonance trends while disagreeing quantitatively—evidence that parasitic and structural loss could not be ignored.</figcaption>
+              </figure>
+            </section>
+
+            <section id="validation" class="case-section">
+              <p class="eyebrow">05</p>
+              <h2>Validation</h2>
+              <div class="evidence-split">
+                <figure>
+                  <button class="figure-open" type="button" aria-label="View full-resolution VNA response">
+                    <img src="../../assets/resonator-vna-small.png" alt="VNA S11 and Smith-chart screenshot for the smaller toroidal resonator prototype near 37 MHz" width="711" height="474" loading="lazy" decoding="async">
+                  </button>
+                  <figcaption><strong>Measured VNA response.</strong> Screenshot for the smaller prototype near 37 MHz.</figcaption>
+                </figure>
+                <div>
+                  <h3>Two VNA prototypes</h3>
+                  <p>Two different parameter sets in the same directly tapped, open-loop topology measured <strong>Q = 38 at 22.66 MHz</strong> and <strong>Q = 58 at 37.15 MHz</strong>.</p>
+                  <p>The higher-frequency, smaller-scale build also produced the higher measured Q, consistent with the central geometry trend of the calibrated model.</p>
+                </div>
+              </div>
+              <div class="evidence-callout">
+                <p class="panel-label">Separate connectorized assembly</p>
+                <p>A different test assembly used the Q = 58 parameter set but replaced direct PCB soldering with removable screw connectors. Added connection resistance reduced and stabilized Q at approximately 45. On that hardware, a low-capacitance probe directly measured approximately 13× and 14× voltage gain at probe-loaded resonances of 19.55 MHz and 30.3 MHz.</p>
+                <p>The Q = 38 / Q = 58 values and the 13× / 14× gains therefore do not describe one physical assembly.</p>
+              </div>
+            </section>
+
+            <section id="results" class="case-section">
+              <p class="eyebrow">06</p>
+              <h2>Results</h2>
+              <ul class="result-list">
+                <li><strong>Topology decision:</strong> the directly tapped, open-loop interpretation replaced the ineffective floating-coupling picture.</li>
+                <li><strong>Modeling decision:</strong> a calibrated full-wave-to-lumped workflow replaced reliance on ideal matching theory alone.</li>
+                <li><strong>Measured trend:</strong> among the two VNA prototypes, the higher-frequency design also produced the higher Q.</li>
+                <li><strong>Integration lesson:</strong> removable connectors improved serviceability but introduced enough resistance to reduce Q.</li>
+                <li><strong>Sensing constraint:</strong> probe and pickoff capacitance cannot be treated as invisible; it measurably moves resonance.</li>
+              </ul>
+            </section>
+
+            <section id="limitations" class="case-section limitation-section">
+              <p class="eyebrow">07</p>
+              <h2>Limitations</h2>
+              <p>The work establishes room-temperature behavior, not completed operation at 4 K or in UHV. The external matching-capacitor arrangement remains a design intent. The voltage-feedback subsystem—capacitive-divider pickoff plus downstream rectifier—is still being designed and has not been bench-validated.</p>
+              <p>Further work should add a calibration and uncertainty budget for connectorized gain measurements, repeated-device and tolerance studies, cryogenic/thermal tests, and reproducible measurement assets.</p>
+            </section>
+          </div>
+        </div>
+      </article>
+
+      <dialog id="image-lightbox" class="image-lightbox" aria-label="Full-resolution project figure">
+        <div class="lightbox-panel">
+          <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close full-resolution figure">×</button>
+          <figure class="lightbox-figure">
+            <img id="lightbox-image" class="lightbox-image" alt="Full-resolution project figure" width="1600" height="900">
+            <figcaption id="lightbox-caption"></figcaption>
+          </figure>
+        </div>
+      </dialog>
+
+      <section class="section contact-section" aria-labelledby="next-title">
+        <div class="shell contact-grid">
+          <div>
+            <p class="eyebrow">Next</p>
+            <h2 id="next-title">Discuss the test strategy</h2>
+          </div>
+          <div class="contact-links">
+            <a href="mailto:charlie.he@duke.edu">charlie.he@duke.edu</a>
+            <a href="../../#work">Return to selected work <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <p>Charlie He · Experimental systems &amp; research</p>
+        <a href="#main">Back to top <span aria-hidden="true">↑</span></a>
+      </div>
+    </footer>
+    <script src="../../assets/lightbox.js"></script>
+  </body>
+</html>
