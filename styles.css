@@ -164,6 +164,8 @@ h3 { margin-bottom: 0.75rem; font-size: clamp(1.25rem, 2.2vw, 1.75rem); }
 .work-meta { align-self: end; margin: 0; color: var(--muted); font-size: 0.78rem; line-height: 1.5; }
 .work-thumb { margin: 0; }
 .work-thumb img { width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--line); background: white; object-fit: cover; }
+.work-thumb-mot { overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+.work-thumb-mot img { display: block; border: 0; transform: scale(1.45); transform-origin: 50% 48%; }
 .text-link { font-weight: 800; text-decoration-thickness: 2px; }
 
 .two-column { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(3rem, 9vw, 8rem); }
@@ -202,11 +204,13 @@ h3 { margin-bottom: 0.75rem; font-size: clamp(1.25rem, 2.2vw, 1.75rem); }
 .status-list li { display: flex; align-items: center; gap: 0.55rem; font-size: 0.82rem; font-weight: 700; }
 .status-dot { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--muted); }
 .status-measured { background: #2f7b65; }
+.status-simulated { background: #4d6ea8; }
 .status-open { background: #9b5c46; }
 .status-design { background: #85752e; }
 
 .case-hero-figure { margin-top: 0; margin-bottom: clamp(4rem, 8vw, 7rem); }
 .case-hero-figure img { width: 100%; max-height: 690px; border: 1px solid var(--line); object-fit: cover; object-position: center 63%; }
+.case-hero-figure.topology-hero img { aspect-ratio: 16 / 9; background: var(--surface); object-fit: contain; object-position: center; }
 .case-hero-figure.animation-hero { width: min(calc(100% - 2.5rem), 960px); }
 .animation-frame { position: relative; overflow: hidden; border: 1px solid var(--line); background: #000; }
 .case-hero-figure.animation-hero img { width: 100%; max-height: none; aspect-ratio: 16 / 9; border: 0; background: #000; object-fit: contain; object-position: center; }
@@ -252,6 +256,8 @@ figcaption { margin-top: 0.75rem; color: var(--muted); font-size: 0.8rem; line-h
   line-height: 1.6;
 }
 .equation-block math {
+  display: block;
+  width: max-content;
   max-width: 100%;
   margin: 0;
   overflow-x: auto;
@@ -259,6 +265,7 @@ figcaption { margin-top: 0.75rem; color: var(--muted); font-size: 0.8rem; line-h
   font-family: "Cambria Math", "STIX Two Math", "Times New Roman", serif;
   font-size: clamp(1.08rem, 2.5vw, 1.38rem);
 }
+.lindblad-equation math { margin-inline: auto; }
 .single-equation { display: block; }
 
 .research-table-wrap { margin: 2rem 0 3rem; overflow-x: auto; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -371,6 +378,8 @@ figure .figure-open > img { border: 0; }
   .work-row { grid-template-columns: 1fr; gap: 0.8rem; }
   .work-row .work-index, .work-thumb, .work-meta { grid-column: 1; }
   .work-row .work-index { margin-bottom: 0.5rem; }
+  .lindblad-equation { padding-inline: 0.75rem; }
+  .lindblad-equation math { font-size: 0.88rem; }
   .timeline-row { grid-template-columns: 1fr; gap: 0.75rem; }
   .figure-contained, .limitation-section { padding: 1.1rem; }
   .image-lightbox { width: calc(100vw - 1rem); max-width: calc(100vw - 1rem); }

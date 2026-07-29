@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Reduced internal-state dynamics for an indium-115 MOT: a seven-level QuTiP/Lindblad model of optical pumping, spontaneous decay, and repumping.">
+    <meta name="theme-color" content="#f3f1eb">
+    <title>Reduced Internal-State Dynamics for an Indium MOT | Charlie He</title>
+    <link rel="stylesheet" href="../../styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="wordmark" href="../../" aria-label="Charlie He, home">Charlie He</a>
+        <nav aria-label="Primary navigation">
+          <ul class="nav-list">
+            <li><a href="../../#interests">Interests</a></li>
+            <li><a href="../../#work">Work</a></li>
+            <li><a href="../../#about">About</a></li>
+            <li><a href="../../#cv">CV</a></li>
+            <li><a href="../../#contact">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <article>
+        <header class="case-hero shell">
+          <a class="back-link" href="../../"><span aria-hidden="true">←</span> Portfolio</a>
+          <p class="eyebrow">Reduced-state simulation · 2025</p>
+          <h1>Reduced Internal-State Dynamics for an Indium MOT</h1>
+          <p class="case-lede">A seven-level QuTiP/Lindblad study of optical pumping, spontaneous decay, and repumping in the internal level structure of <sup>115</sup>In.</p>
+          <ul class="status-list" aria-label="Project scope and validation status">
+            <li><span class="status-dot status-simulated" aria-hidden="true"></span>Seven-level Lindblad model</li>
+            <li><span class="status-dot status-design" aria-hidden="true"></span>NIST + literature transition inputs</li>
+            <li><span class="status-dot status-open" aria-hidden="true"></span>Numerical only · no experimental validation</li>
+          </ul>
+        </header>
+
+        <figure class="case-hero-figure topology-hero shell">
+          <button class="figure-open" type="button" aria-label="View full-resolution seven-level topology">
+            <img src="../../assets/mot-seven-level-topology-hero.svg" alt="Seven-level reduced indium internal-state model. A 325.7 nm coherent cooling drive couples 5P3/2 F=6 and 5D5/2 F=7; 410.3 and 451 nm coherent repumping drives couple four lower levels to 6S1/2 F=5. Dashed arrows show physical spontaneous-decay branches. A separate inset identifies the artificial 0.1 D-to-S branch used only for a 1000-times leakage stress test." width="1600" height="900" fetchpriority="high">
+          </button>
+          <figcaption><strong>Original topology of the seven hyperfine levels retained in Charlie's reduced QuTiP model.</strong> Solid double-headed paths are coherent laser drives; dashed single-headed paths are spontaneous decay. The lower diagnostic inset is an artificial 1000× leakage stress test, not a physical branching ratio. This is a numerical internal-state model, not an experimental level-scheme measurement.</figcaption>
+        </figure>
+
+        <div class="case-layout shell">
+          <aside class="case-toc" aria-label="Case study sections">
+            <p class="panel-label">Case study</p>
+            <ol>
+              <li><a href="#problem">Problem</a></li>
+              <li><a href="#role">My role</a></li>
+              <li><a href="#model">Reduced model</a></li>
+              <li><a href="#studies">Parameter studies</a></li>
+              <li><a href="#results">Results</a></li>
+              <li><a href="#sources">Sources</a></li>
+              <li><a href="#limitations">Limitations</a></li>
+            </ol>
+          </aside>
+
+          <div class="case-content">
+            <section id="problem" class="case-section">
+              <p class="eyebrow">01</p>
+              <h2>Problem</h2>
+              <p>Indium does not offer a convenient closed cooling transition from its ground state. Published work instead used a long-lived 5P<sub>3/2</sub> metastable manifold, a 325.7 nm cooling transition, and multiple repumping paths to realize an experimental magneto-optical trap.</p>
+              <p>This course project asked a narrower modeling question: how much of the internal-state population flow could be understood with a computationally manageable open-quantum-system model?</p>
+              <div class="evidence-callout">
+                <p class="panel-label">Scope boundary</p>
+                <p>The published experiment supplied the physical context. This project did not build, operate, or measure a MOT, laser system, magnetic-field coil, vacuum chamber, or cold-atom apparatus.</p>
+              </div>
+            </section>
+
+            <section id="role" class="case-section">
+              <p class="eyebrow">02</p>
+              <h2>My role</h2>
+              <p>The final report was completed with Son Pham. The main report body was team work.</p>
+              <p>I developed the QuTiP simulation, wrote the technical appendix, produced all simulation figures, calculated the Landé g-factors and hyperfine branching ratios, and found and organized the references and NIST Atomic Spectra Database data used by the model.</p>
+            </section>
+
+            <section id="model" class="case-section">
+              <p class="eyebrow">03</p>
+              <h2>A reduced seven-level model</h2>
+              <p>Within the course scope, I deliberately coarse-grained 95 magnetic sublevels into seven hyperfine-level states to isolate population-flow mechanisms and keep the model interpretable. This abstraction was a modeling choice, not a claim that the omitted spatial, Zeeman, or polarization physics was negligible.</p>
+              <div class="research-table-wrap">
+                <table class="research-table compact-table">
+                  <caption>Internal states included in the QuTiP model</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Manifold</th>
+                      <th scope="col">Included F levels</th>
+                      <th scope="col">Modeled role</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">5P<sub>1/2</sub></th>
+                      <td>F = 4, 5</td>
+                      <td>Ground-state population and repumping inputs</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">5P<sub>3/2</sub></th>
+                      <td>F = 4, 5, 6</td>
+                      <td>Metastable levels; F = 6 is the lower cooling state</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">6S<sub>1/2</sub></th>
+                      <td>F = 5</td>
+                      <td>Intermediate repumping state</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">5D<sub>5/2</sub></th>
+                      <td>F = 7</td>
+                      <td>Upper cooling state</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>Level energies came from NIST ASD data and published hyperfine splittings. Fine-structure transition rates were combined with Wigner-6j strengths calculated in Python to construct hyperfine branching ratios. The time evolution was solved with QuTiP's master-equation solver.</p>
+              <div class="equation-block lindblad-equation" role="math" aria-label="The time derivative of rho equals negative i times the commutator of H zero plus H interaction of t with rho, plus the sum over k of C k rho C k dagger minus one half times the anticommutator of C k dagger C k with rho.">
+                <math display="block" aria-hidden="true">
+                  <semantics>
+                    <mrow>
+                      <mfrac>
+                        <mrow><mi>d</mi><mi>ρ</mi></mrow>
+                        <mrow><mi>d</mi><mi>t</mi></mrow>
+                      </mfrac>
+                      <mo>=</mo>
+                      <mo>−</mo><mi>i</mi>
+                      <mo stretchy="false">[</mo>
+                      <msub><mi>H</mi><mn>0</mn></msub>
+                      <mo>+</mo>
+                      <msub><mi>H</mi><mtext>int</mtext></msub>
+                      <mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo>
+                      <mo>,</mo><mi>ρ</mi>
+                      <mo stretchy="false">]</mo>
+                      <mo>+</mo>
+                      <munder><mo>∑</mo><mi>k</mi></munder>
+                      <mo stretchy="false">(</mo>
+                      <msub><mi>C</mi><mi>k</mi></msub>
+                      <mi>ρ</mi>
+                      <msubsup><mi>C</mi><mi>k</mi><mo>†</mo></msubsup>
+                      <mo>−</mo>
+                      <mfrac><mn>1</mn><mn>2</mn></mfrac>
+                      <mo stretchy="false">{</mo>
+                      <msubsup><mi>C</mi><mi>k</mi><mo>†</mo></msubsup>
+                      <msub><mi>C</mi><mi>k</mi></msub>
+                      <mo>,</mo><mi>ρ</mi>
+                      <mo stretchy="false">}</mo>
+                      <mo stretchy="false">)</mo>
+                    </mrow>
+                    <annotation encoding="application/x-tex">\frac{d\rho}{dt} = -i[H_0 + H_{\mathrm{int}}(t),\rho] + \sum_k\left(C_k\rho C_k^\dagger - \frac{1}{2}\{C_k^\dagger C_k,\rho\}\right)</annotation>
+                  </semantics>
+                </math>
+              </div>
+              <ul class="constraint-list">
+                <li><strong>Coherent drive:</strong> time-dependent Hamiltonian terms represented the cooling and repumping lasers.</li>
+                <li><strong>Population loss and transfer:</strong> collapse operators represented spontaneous decay between included levels.</li>
+                <li><strong>Dark-state diagnostic:</strong> additional dephasing operators tested whether coherent population trapping was an artifact of perfectly phase-coherent simulated drives.</li>
+              </ul>
+            </section>
+
+            <section id="studies" class="case-section visual-section">
+              <p class="eyebrow">04</p>
+              <h2>Parameter studies</h2>
+              <p>The final notebook became a working parameter-study file: after the report was completed, individual detunings, dephasing rates, leakage values, initial states, and laser combinations were repeatedly changed to inspect different regimes. The saved plots preserve the report-aligned comparisons more clearly than the notebook's last parameter state.</p>
+
+              <figure class="wide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution state-preparation simulation">
+                  <img src="../../assets/mot-preparation-dephasing.png" alt="Simulated populations of seven indium hyperfine levels during state preparation with modeled dephasing" width="1189" height="985" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>State-preparation simulation, not a measurement.</strong> Adding modeled dephasing suppresses coherent population trapping and transfers most of the simulated population toward the lower cooling state, 5P<sub>3/2</sub>, F = 6.</figcaption>
+              </figure>
+
+              <figure class="wide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution natural-leakage simulation">
+                  <img src="../../assets/mot-natural-leakage.png" alt="Four simulated cooling scenarios showing lower and upper cooling-state populations with the small physical leakage channel" width="1189" height="985" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Small-leakage simulation, not a measurement.</strong> Across the simulated time window, the physical leakage channel was too small to create a recognizable separation between the four laser configurations.</figcaption>
+              </figure>
+
+              <figure class="wide-figure">
+                <button class="figure-open" type="button" aria-label="View full-resolution enhanced-leakage simulation">
+                  <img src="../../assets/mot-enhanced-leakage-scenarios.png" alt="Four simulated cooling scenarios comparing all lasers on, one repumper disabled, the other repumper disabled, and cooling only under artificially amplified leakage" width="1189" height="985" loading="lazy" decoding="async">
+                </button>
+                <figcaption><strong>Artificial 1000× leakage diagnostic.</strong> The leakage probability was deliberately amplified from approximately 10<sup>-4</sup> to 0.1 so the effect of disabling each repumping path would become visible within a short simulation. This is a sensitivity study, not a physical prediction.</figcaption>
+              </figure>
+            </section>
+
+            <section id="results" class="case-section">
+              <p class="eyebrow">05</p>
+              <h2>What the simulation showed</h2>
+              <div class="evidence-split">
+                <figure>
+                  <button class="figure-open" type="button" aria-label="View full-resolution target-state comparison">
+                    <img src="../../assets/mot-enhanced-leakage-target.png" alt="Simulated population of the indium 5P3/2 F equals 6 state for four laser configurations under artificially amplified leakage" width="846" height="547" loading="lazy" decoding="async">
+                  </button>
+                  <figcaption><strong>Focused 1000× leakage comparison.</strong> Simulated 5P<sub>3/2</sub>, F = 6 population under four laser configurations.</figcaption>
+                </figure>
+                <div>
+                  <h3>A diagnostic sequence, not experimental validation</h3>
+                  <p>Modeled dephasing removed the strong dark-state behavior produced by perfectly coherent drives and allowed the state-preparation simulation to move population toward 5P<sub>3/2</sub>, F = 6.</p>
+                  <p>At the literature-scale leakage probability, no recognizable loss emerged over the simulated microsecond window. Artificially amplifying that channel by 1000× exposed the relative role of the repumping lasers.</p>
+                </div>
+              </div>
+              <ul class="result-list">
+                <li><strong>Modeling lesson:</strong> coherent population trapping can dominate a simplified simulation when independent experimental laser phases are represented as perfectly coherent.</li>
+                <li><strong>Timescale lesson:</strong> a physically small leakage channel may be invisible in a short numerical run even when it matters over much longer operation.</li>
+                <li><strong>Diagnostic lesson:</strong> deliberately exaggerating one mechanism can reveal causal differences between control configurations, provided the result is not presented as a physical forecast.</li>
+              </ul>
+            </section>
+
+            <section id="sources" class="case-section">
+              <p class="eyebrow">06</p>
+              <h2>External sources and data</h2>
+              <p>The experimental design, atomic data, and reference theory belong to their original authors and institutions. No external paper, book PDF, experimental figure, or NIST data file is reproduced on this site.</p>
+              <p>The topology above is an original diagram reconstructed from the relationships in Charlie's reduced model; no external paper level scheme, NIST graphic, experimental photograph, or third-party figure was copied or traced.</p>
+              <ul class="result-list">
+                <li><a href="https://doi.org/10.1103/PhysRevA.105.L061101">Yu et al., “Magneto-optical trapping of a group-III atom,” Physical Review A 105, L061101 (2022)</a> — experimental MOT context and level scheme.</li>
+                <li><a href="https://doi.org/10.1103/PhysRevResearch.4.013238">Yu et al., “Zeeman slowing of a group-III atom,” Physical Review Research 4, 013238 (2022)</a> — state preparation, transition parameters, and hyperfine data.</li>
+                <li><a href="https://physics.nist.gov/asd">NIST Atomic Spectra Database</a>, version 5.12 as accessed in March 2025; <a href="https://doi.org/10.18434/T4W30F">database citation and DOI</a> — energy levels and transition-rate inputs.</li>
+                <li><a href="https://doi.org/10.1103/PhysRevA.76.022501">Safronova, Safronova, and Kozlov, Physical Review A 76, 022501 (2007)</a> — small leakage-channel context used in the appendix.</li>
+              </ul>
+            </section>
+
+            <section id="limitations" class="case-section limitation-section">
+              <p class="eyebrow">07</p>
+              <h2>Limitations</h2>
+              <p>The model omits magnetic sublevels, spatial motion, Zeeman shifts, polarization selection, laser-beam geometry, atomic collisions, and the position-dependent restoring force that makes a MOT a trap. It therefore cannot predict temperature, cloud size, capture efficiency, atom number, or an experimental trap lifetime.</p>
+              <p>The figures are numerical outputs, not measured data and not experimental validation. The final notebook was later reused for parameter exploration, so its saved last state is not treated as one canonical benchmark configuration. This page reports the course-report conclusions together with the corresponding saved plots.</p>
+            </section>
+          </div>
+        </div>
+      </article>
+
+      <dialog id="image-lightbox" class="image-lightbox" aria-label="Full-resolution project figure">
+        <div class="lightbox-panel">
+          <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close full-resolution figure">×</button>
+          <figure class="lightbox-figure">
+            <img id="lightbox-image" class="lightbox-image" alt="Full-resolution project figure" width="1600" height="900">
+            <figcaption id="lightbox-caption"></figcaption>
+          </figure>
+        </div>
+      </dialog>
+
+      <section class="section contact-section" aria-labelledby="next-title">
+        <div class="shell contact-grid">
+          <div>
+            <p class="eyebrow">Next</p>
+            <h2 id="next-title">Discuss the model boundary</h2>
+          </div>
+          <div class="contact-links">
+            <a href="mailto:charlie.he@duke.edu">charlie.he@duke.edu</a>
+            <a href="../../#work">Return to selected work <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <div>
+          <p>Charlie He · Experimental systems &amp; research</p>
+          <p class="visitor-counter-note">Cookie-free aggregate traffic analytics by Cloudflare Web Analytics.</p>
+        </div>
+        <a href="#main">Back to top <span aria-hidden="true">↑</span></a>
+      </div>
+    </footer>
+    <script src="../../assets/lightbox.js"></script>
+    <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c3f1f885fe644bca8942773857639de0"}'></script><!-- End Cloudflare Web Analytics -->
+  </body>
+</html>
