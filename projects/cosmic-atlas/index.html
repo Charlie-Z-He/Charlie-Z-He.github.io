@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"><link rel="icon" href="data:,">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Cosmic Atlas is the star map of a personal game prototype. This case study covers how a fitted model replaced a gravity simulation, and the artifacts that playtests found after the numerical checks had passed.">
+    <meta name="theme-color" content="#f3f1eb">
+    <title>Cosmic Atlas | Charlie He</title>
+    <link rel="stylesheet" href="../../styles.css">
+  <meta name="atlas-runtime" content="../../atlas/?pilot=0&amp;lang=en"></head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="wordmark" href="../../" aria-label="Charlie He, home">Charlie He</a>
+        <nav aria-label="Primary navigation">
+          <ul class="nav-list">
+            <li><a href="../../#interests">Interests</a></li>
+            <li><a href="../../#work">Work</a></li>
+            <li><a href="../../#about">About</a></li>
+            <li><a href="../../#cv">CV</a></li>
+            <li><a href="../../#contact">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <article>
+        <header class="case-hero shell">
+          <a class="back-link" href="../../#work"><span aria-hidden="true">←</span> Selected work</a>
+          <p class="eyebrow">Computational physics · Scientific software</p>
+          <h1>Cosmic Atlas</h1>
+          <p class="case-lede">Cosmic Atlas is the star map of a personal game prototype: a procedurally generated universe that one camera can zoom through, from the cosmic web down to a single planet. Its matter comes from a model, not from observations. This case study asks how much of a gravity simulation a fast approximation can replace, and how I found out where it could not.</p>
+        </header>
+        <div class="case-hero-figure shell atlas-project" data-atlas>
+          <figure><img src="../../assets/cosmic-atlas-view.webp" alt="A dense field of stars in the atlas with a 200 light-year focal-plane scale" width="940" height="592"><figcaption>Screenshot from the atlas, inside one generated galaxy. The scale bar measures distance at the focal plane.</figcaption></figure>
+          <button class="button button-secondary" data-launch hidden type="button">Explore the atlas</button>
+          <div class="atlas-frame" data-frame hidden>
+              <div class="atlas-controls"><span>H for full sphere · Drag to orbit</span><button class="text-link" data-fullscreen type="button">Full screen</button><button class="text-link" data-close type="button">Close atlas</button></div>
+            </div>
+        </div>
+        <div class="case-layout shell">
+          <aside class="case-toc" aria-label="Case study sections"><p class="panel-label">Case study</p><ol>
+              <li><a href="#problem">Problem</a></li>
+              <li><a href="#role">My role</a></li>
+              <li><a href="#reference">Gravity reference</a></li>
+              <li><a href="#fit">Fitted model</a></li>
+              <li><a href="#scales">Four-scale audit</a></li>
+              <li><a href="#shared">One shared field</a></li>
+              <li><a href="#boundary">Periodic stripes</a></li>
+              <li><a href="#results">What the evidence changed</a></li>
+              <li><a href="#limitations">Limitations</a></li>
+            </ol></aside>
+          <div class="case-content">
+            <section class="case-section" id="problem">
+              <p class="eyebrow">01</p>
+              <h2>Problem</h2>
+              <p>The map is budgeted for about 3.7 billion galaxies, far too many to store as coordinates. Detail has to be generated when the camera arrives, and it has to be the same detail on every visit. A gravity simulation produces convincing large-scale structure, with knots, filaments and voids, but it is too slow to run for each new region while the camera is moving.</p>
+              <p>So the question was whether a cheaper fitted model could stand in for the simulation, and how its errors would show up in the map. Most of what follows is about errors that the first numerical checks did not catch.</p>
+              <p>The work described here places galaxies. Stars and planets inside a galaxy come from a separate seeded generator that this case study does not evaluate.</p>
+            </section>
+            <section class="case-section" id="role">
+              <p class="eyebrow">02</p>
+              <h2>My role</h2>
+              <p>This is a personal project built with an AI coding agent. I set the goals and the numerical constraints, chose which experiment to run at each stage, playtested each build, and decided which builds were acceptable.</p>
+              <p>The Codex coding agent wrote the implementation and the audit scripts under those instructions, and the measurements on this page come from its recorded runs.</p>
+            </section>
+            <section class="case-section" id="reference">
+              <p class="eyebrow">03</p>
+              <h2>A reference worth approximating</h2>
+              <p>The first experiment asked what structure gravity alone would produce in a local patch. It followed 64³ collisionless matter tracers in a periodic box 256 comoving megaparsecs wide, about 0.8 billion light-years. At each step, a particle-mesh solver deposited their mass on a 64³ grid, solved Poisson’s equation in Fourier space, and used the resulting force to advance the particles.</p>
+              <p>The run takes place in an expanding universe, and its clock is the expansion factor <i>a</i>: the size of the universe relative to today. At <i>a</i> = 1, distances between galaxies have their present values. At <i>a</i> = 0.1, every such distance was one tenth as large. The simulation works in comoving coordinates, which divide that overall stretch out. The box is therefore 256 Mpc wide in every panel below, and the only change visible is how gravity rearranges matter inside it.</p>
+              <p>Expansion matters to the result because it works against collapse: gravity pulls matter together while the background carries it apart, and the expansion rate sets how fast structure can grow. The run starts at <i>a</i> = 0.02, when matter is almost uniform, and advances to <i>a</i> = 1 in 160 logarithmically spaced steps. The expansion rate at each step comes from the Friedmann equation with an assumed parameter set (H<sub>0</sub> = 67.4 km/s/Mpc, matter fraction 0.315), not a fit to observations.</p>
+              <p>On the development machine a complete run took about 52 seconds, including initial-spectrum preparation, checks and plots. That is practical offline. It is not practical for every new region during a camera move.</p>
+              <figure class="case-figure"><button class="figure-open" type="button" aria-label="Enlarge the gravity evolution figure"><img src="../../assets/atlas-gravity-evolution-en-9bdb444b.png" width="2100" height="750" loading="lazy" alt="Three matched slices evolve from a nearly uniform field into bright knots and dark voids."></button><figcaption><strong>Gravity reference, one run.</strong> Left to right, the expansion factor is 0.1, 0.5 and 1: the universe at one tenth, one half and all of its present size. Both spatial axes span 256 comoving Mpc. Each panel averages the same central four grid layers, with one logarithmic color scale from 0.15 to 15 times mean density. Across the three panels, the share of grid cells below 30% of mean density rises from 0 to 5.8% and then 21.6% as voids empty into knots and filaments. The colors measure matter density; this experiment did not model starlight or gas cooling. <a href="../../assets/atlas-gravity-evolution-en-9bdb444b.png">View full-resolution PNG</a>.</figcaption></figure>
+            </section>
+            <section class="case-section" id="fit">
+              <p class="eyebrow">04</p>
+              <h2>Fitting the final displacement</h2>
+              <p>The atlas needs one thing from the simulation: where each tracer ends up. The first fitted model predicted that displacement directly. For each training seed, a reference solve and the predictor started from the same noise, tracer identities and continuous parent density field. Regularized least squares fitted eight vector terms describing displacement, tidal deformation and local collapse at several smoothing scales. That fit underestimated density contrast by about 25%, and two further density-gradient terms corrected part of the error.</p>
+              <p>The training set used 24 seeds across dense, typical and sparse parent environments. To compare like with like, both sides ran at 32³, a smaller setup than the 64³ run above. The 112-step reference took 1.5–2.2 seconds per block on the test machine. In an isolated Edge browser the fitted generator took about 185 ms on its first call and 143–179 ms afterwards, excluding drawing. That is roughly ten times faster.</p>
+              <p>On six held-out seeds, the correlation between smoothed log-density fields was 0.982–0.988. The fit recovered the coarse structure, yet it assigned 3.8–5.0 percentage points too much volume to voids below 30% of mean density. That bias matters in a map whose empty regions are as visible as its bright clusters.</p>
+            </section>
+            <section class="case-section" id="scales">
+              <p class="eyebrow">05</p>
+              <h2>Testing the fit at four scales</h2>
+              <p>A fit tested in one box still had to work when the camera entered a much smaller patch. By this point a simpler generator with four tuned controls had replaced the eight-term fit. Its four values were fixed before the audit and were not refitted to the new seeds.</p>
+              <p>The audit used eight new seed families at four widths, from 4.8 down to 0.01875 billion light-years. Each smaller reference box received an environment cropped from its parent. The pass thresholds were set in advance: a smoothed log-density correlation of at least 0.94, and at least 95% of the short bridges between nearby reference peaks keeping their density support. Across the 32 cases the lowest correlation was 0.956, and 3,981 of 3,987 bridges were retained.</p>
+              <figure class="case-figure"><button class="figure-open" type="button" aria-label="Enlarge the four-scale comparison"><img src="../../assets/atlas-fit-comparison-en-44408954.png" width="1560" height="1820" loading="lazy" alt="Four rows compare the reference density, fitted density and sampling field in successively smaller patches."></button><figcaption><strong>One seed family from the 32-case audit.</strong> Rows give the width along both spatial axes, from 4.8 down to 0.01875 billion light-years. Color encodes log(1 + density summed along the third axis), using the same range across each row. Compare the left and middle columns for the gravity fit. The right column shows a separate postprocessing step that concentrated samples in peaks while protecting bridges. The broad peaks track the reference more closely than some of their fine structure. <a href="../../assets/atlas-fit-comparison-en-44408954.png">View full-resolution PNG</a>.</figcaption></figure>
+              <p>The audit passed, and I still rejected the build after playtesting it. Regions that had been round now appeared as boxes, and galaxies were sorted into groups that ran into one another.</p>
+              <p>The follow-up traced both symptoms to steps after the density field. The build displayed its internal computation blocks, 1.0–1.7 billion light-years on a side, where the earlier map had sampled spheres of radius 0.45 billion light-years. It had also replaced the earlier grouping rule, which followed density peaks and penalized low-density gaps, with fixed distance thresholds: 12 million light-years for a group core and 110 million for a cluster. Density along the path no longer decided membership, so groups grew large and overlapped.</p>
+              <p>The 32 cases had tested the fit against its own 32³ reference in square boxes. They exercised neither the grouping rule nor the block layout. A stricter check on the original 64³ regions then showed a second gap: the 32³ fit agreed with its own reference at about 0.97, but in some group-sized windows its correlation with the 64³ field fell to 0.61–0.84, because the coarser fit does not resolve dense cores.</p>
+            </section>
+            <section class="case-section" id="shared">
+              <p class="eyebrow">06</p>
+              <h2>From one field per cluster to one shared field</h2>
+              <p>The next design fixed the clusters themselves: the points seen from far away are the clusters, and zooming in only reveals their interiors. Each interior was generated separately, from a field conditioned on that cluster’s surroundings. Neighbors influenced the orientation of an interior and nothing else, so no matter was generated between clusters. I required that each cluster form together with its neighbors. In the redesign, nearby clusters contribute mass to one parent field, the generator evaluates overlapping neighborhoods on a fixed world grid, and every material sample has a single stable address.</p>
+              <p>A later playtest raised a related complaint. At a scale of about two billion light-years, space looked as if it were assembled from small clumps of similar size and orientation. The audit separated the display from the data. Every unresolved cluster was drawn with one template: the same 16 sample slots, fixed axis ratios of 1 : 0.55 : 0.35, and a preview radius capped at 80 million light-years, a cap that about a third of all clusters reached. The generated members were less uniform than the picture. Among clusters with at least 24 members, the 90th-percentile half-member radius was about 4.3 times the 10th-percentile one. Elongated groups did show weak alignment with their neighbors (mean cos² of 0.368 against 0.331 when shuffled), but there was no common direction across the image.</p>
+              <p>Both fixes moved toward a single source. Distant previews are now drawn from the same material as the detail they stand for. On the generation side, the input for neighboring clusters became one continuous parent field in world coordinates, without the per-cluster rebuilding and renormalization that had given every cluster a similar starting point. Groups are identified after the matter exists, and travel routes are drawn between existing objects last, so neither step can move matter.</p>
+              <p>Several things had changed between those builds, so I asked for a controlled test of the input alone. It started from an earlier build that still generated each cluster from its own input, and replaced only the first density input with the continuous field. The fit coefficients, the contraction steps, the grouping, the budgets and the display stayed as they were. Across five environments the two versions kept the same peaks and voids, with a log-density correlation of 0.86–0.91. The continuous input put more members into connections and outskirts: in the typical region the same window went from 4,484 members to 5,691. Not every bridge survived the change. Retention was 100% in the dense region, about 92% in the typical one and about 78% across a chart boundary.</p>
+              <figure class="case-figure"><button class="figure-open" type="button" aria-label="Enlarge the controlled comparison of per-cluster and continuous input"><img src="../../assets/atlas-shared-field.webp" width="1716" height="620" loading="lazy" alt="Two views of the same region. Left: compact separate clumps around a central knot. Right: the same knot with looser strands linking it to its neighbors."></button><figcaption><strong>One variable changed.</strong> Both captures show the region from the complaint with the same observation point, camera and two-billion-light-year scale. Left: per-cluster input. Right: the same code with only the density input replaced by the continuous field. The large structures stay in place. On the right the compact, separate clumps give way to looser strands between the central knot and its neighbors. The difference is modest, which is the result of the test. <a href="../../assets/atlas-shared-field.webp">View full-size image</a>.</figcaption></figure>
+            </section>
+            <section class="case-section" id="boundary">
+              <p class="eyebrow">07</p>
+              <h2>Stripes from a periodic local solver</h2>
+              <p>Unifying the input exposed another artifact. In one region I saw parallel layers that had not been there before. The agent reproduced them in the generated members, so they were not a display effect.</p>
+              <p>The cause was the local solve. Each small block computed its displacement with a fast Fourier transform, and an FFT treats its box as periodic: mass leaving one face re-enters through the opposite face, and a slow trend across the block becomes a step where the two ends meet. With a continuous parent field, most blocks carry such a trend. The contraction steps that follow then sharpen the response into layers locked to the block size.</p>
+              <p>To measure it, the positions of the final material were written in block units along each grid axis, and the magnitude of the mean of exp(2πi<i>x</i>) was taken, keeping the largest of the three axes. A value near zero means no structure repeats with the block. In three test regions the measure was 14.5–19.3%. Replacing the periodic coarse field with a common long-range field over the whole sphere, plus a short-range correction delivered only from the interior of each solve box, brought it to 0.8–1.6%.</p>
+              <p>That version was slower and lost visible contrast, so a faster generator was kept, and with it a periodic solve. The measure rose again, to about 9% in the worst probe. The current build removes the wrap directly. It convolves over the real neighborhood with zero padding and a guard ring of real density, and material that leaves a box does not come back on the other side.</p>
+              <figure class="case-figure"><button class="figure-open" type="button" aria-label="Enlarge the before and after comparison of the striped region"><img src="../../assets/atlas-periodic-stripes.webp" width="1616" height="620" loading="lazy" alt="Left: a supercluster drawn as a blocky patch crossed by straight parallel bands. Right: the same supercluster as a small irregular knot with thin strands."></button><figcaption><strong>The same supercluster before and after.</strong> Both captures select the same supercluster at the same two-billion-light-year scale, with the interface hidden. The selection is highlighted and its surroundings are dimmed. Left: the build with the continuous parent field and periodic local solves, where the supercluster breaks into straight parallel bands. Right: the first open-boundary build after recalibration. The camera orientation differs between the two builds, and so do sampling and contrast, so the pair illustrates the stripes and is not a controlled comparison. <a href="../../assets/atlas-periodic-stripes.webp">View full-size image</a>.</figcaption></figure>
+              <p>Opening the boundary was not enough alone. The old coefficients had been tuned with the periodic solver in place, so they were recalibrated against an open-boundary particle-mesh reference: two amplitudes, chosen from 60 preset candidates on two training seeds, then read on two held-out seeds across five environments.</p>
+              <p>On the held-out seeds, the periodic solve kept 68 of 95 reference bridges continuous and missed the void share by 4.7 percentage points. The open boundary with the old coefficients kept 78 bridges but missed the void share by 14.2 points. After recalibration, all 95 bridges stayed continuous and the void error was 3.0 points. Median bridge density, relative to the reference, went from 0.25 to 0.48 to 0.54.</p>
+              <p>The first recalibration, chosen on a combined score alone, left thin bridges broken in the typical region. I kept that failure on record and added a constraint: at least 95% of reference bridges had to stay continuous before the score was compared.</p>
+            </section>
+            <section class="case-section" id="results">
+              <p class="eyebrow">08</p>
+              <h2>What the evidence changed</h2>
+              <p>A fitted model can replace the per-region gravity solve for placing galaxies. In the paired test it reproduced the coarse density field at roughly a tenth of the cost, with a known excess of void volume.</p>
+              <p>Agreement on the density field did not validate the map. The build that passed every field threshold failed on a grouping rule and a block layout that the audit never exercised, and a playtest found it.</p>
+              <p>The later artifacts came from how the computation was divided, not from the fit. Separate fields per cluster left gaps and made clusters alike. A periodic solve per block printed the block size onto the matter. Each was fixed by sharing more of the field and then recalibrating, because coefficients tuned around an artifact stop being right when the artifact is removed.</p>
+            </section>
+            <section class="case-section" id="limitations">
+              <p class="eyebrow">09</p>
+              <h2>Limitations</h2>
+              <p>The universe is synthetic. The references are particle-mesh models of gravity alone at 24³ to 64³ tracers, which do not resolve galaxy cores and do not include gas, star formation or starlight. The four-scale audit compares the game’s model with its own reference at each width; it says nothing about the real universe at those scales.</p>
+              <p>The first fit was trained on three parent environments. It overestimates void volume, and six reference bridges were lost in the scale audit. The generator in the current build is a later and cheaper descendant of the audited ones, so the accuracy figures in sections 04 and 05 do not describe it. The held-out figures in section 07 do.</p>
+              <p>The current build is an open-boundary approximation over a finite neighborhood. It does not include tides from distant matter. Bridge density in the typical region is still only 0.20–0.31 of the reference, and the records do not show that every grid-aligned pattern is gone. Every test covers a handful of regions and seeds on one development machine, and none measured generation of the whole universe.</p>
+              <p>This interactive atlas uses precomputed data. If the viewer cannot load, the screenshot above shows the opening view.</p>
+            </section>
+          </div>
+        </div>
+      </article>
+
+      <section class="section contact-section" aria-labelledby="next-title">
+        <div class="shell contact-grid">
+          <div>
+            <p class="eyebrow">Next</p>
+            <h2 id="next-title">Discuss the approximation and its checks</h2>
+          </div>
+          <div class="contact-links">
+            <a href="mailto:charlie.he@duke.edu">charlie.he@duke.edu</a>
+            <a href="../../#work">Return to selected work <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <div>
+          <p>Charlie He · Experimental systems &amp; research</p>
+          <p class="visitor-counter-note">Cookie-free aggregate traffic analytics by Cloudflare Web Analytics.</p>
+        </div>
+        <a href="#main">Back to top <span aria-hidden="true">↑</span></a>
+      </div>
+    </footer>
+    <dialog id="image-lightbox" class="image-lightbox" aria-label="Full-resolution project figure">
+        <div class="lightbox-panel">
+          <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close full-resolution figure">×</button>
+          <figure class="lightbox-figure">
+            <img id="lightbox-image" class="lightbox-image" alt="Full-resolution project figure" width="1600" height="900">
+            <figcaption id="lightbox-caption"></figcaption>
+          </figure>
+        </div>
+      </dialog>
+    <script src="../../assets/lightbox.js" defer></script>
+    <script src="../../assets/cosmic-atlas.js"></script>
+    
+  <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c3f1f885fe644bca8942773857639de0"}'></script><!-- End Cloudflare Web Analytics -->
+  </body>
+</html>

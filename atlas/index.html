@@ -1,0 +1,53 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><link rel="icon" href="data:,"><script src="./en-phrases.js"></script><script src="./language.js"></script><title>D0009 · 宇宙宏观视效样板</title>  <script type="module" crossorigin src="./assets/index-DbpRNfd7.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-Dnqn0pzg.css">
+<style>
+html,body,#app,main,#viewport{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important}
+body,#app,main{display:block!important;overflow:hidden!important;min-width:0!important;min-height:0!important}
+#viewport{position:relative!important;border:0!important;min-width:0!important;min-height:0!important}
+#app>header,#app>footer,main>aside,.scene-title,.view-tools,.view-caption,.early-legend,#groupLabels,#superLabels{display:none!important}
+#viewport .scale{display:block!important;pointer-events:none!important;position:absolute!important;left:16px!important;bottom:14px!important;right:auto!important;top:auto!important;color:#e5eee9!important;text-shadow:0 1px 4px #000}
+#viewport .scale b{display:none!important}
+#viewport .scale small{display:block!important;color:#c1d3c5!important;font-size:12px}
+#viewport .depth-navigation{pointer-events:none!important;top:14px!important;left:16px!important;right:auto!important;bottom:auto!important;transform:none!important;max-width:70%!important;width:auto!important;min-width:0!important;background:#07100dbb!important;border:0!important;text-align:left!important;backdrop-filter:none!important;padding:4px 7px!important}
+#viewport .depth-navigation>div,#viewport .depth-navigation>button,#detailStatus{display:none!important}
+#viewport .depth-navigation>small:first-child{display:block!important;color:#dae6df!important;font-size:13px!important}
+#viewport:after{content:'Scroll to zoom · Click to lock · Right-click to unlock';position:absolute;right:14px;bottom:16px;pointer-events:none;color:#c1d3c5;background:#07100da6;padding:3px 5px;font:12px/1.35 system-ui}
+@media(pointer:coarse){#viewport:after{content:"Drag to orbit · Pinch to zoom"!important}}
+@media(max-width:560px){#viewport:after{bottom:auto;right:10px;top:42px;max-width:125px;font-size:11px}}
+</style></head><body><div id="app"></div><script>(function connectEmbed(awaitDraw) {
+  const owner = window.parent;
+  if (owner === window) return;
+  function ready() {
+    if (!awaitDraw && !window.__macroRead?.().count) {
+      setTimeout(ready, 200);
+      return;
+    }
+    owner.postMessage('atlas-ready', '*');
+    const canvas = document.querySelector('#viewport canvas');
+    canvas?.addEventListener('webglcontextlost', () => owner.postMessage('atlas-unavailable', '*'), {once: true});
+    if (!canvas || navigator.maxTouchPoints === 0) return;
+    // Feed two-finger distance changes into the release's existing wheel zoom.
+    let previous = 0;
+    function pinch(event) {
+      if (event.touches.length !== 2) { previous = 0; return; }
+      const [a,b] = event.touches;
+      const distance = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+      if (event.cancelable) event.preventDefault();
+      if (previous && distance && event.type === 'touchmove') {
+        canvas.dispatchEvent(new WheelEvent('wheel', {
+          bubbles: true, cancelable: true, clientX: (a.clientX+b.clientX)/2,
+          clientY: (a.clientY+b.clientY)/2, deltaY: -Math.log(distance/previous)/0.0025
+        }));
+      }
+      previous = distance;
+    }
+    for (const name of ['touchstart','touchmove','touchend','touchcancel']) {
+      canvas.addEventListener(name, pinch, {passive: false});
+    }
+  }
+  if (awaitDraw && !window.__atlasDisplayReady) {
+    window.addEventListener('atlas-display-ready', ready, {once:true});
+  } else {
+    ready();
+  }
+})(true);</script></body></html>
